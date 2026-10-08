@@ -178,7 +178,7 @@ function TeacherApp({ user, onSignOut, notice, setNotice }: { user: User; onSign
 
 function tabLabel(tab: string) { return ({ overview: 'Overview', quizzes: 'Quizzes', students: 'Students', results: 'Results' } as Record<string, string>)[tab] ?? tab; }
 function NavItem({ active, icon, label, count, onClick }: { active: boolean; icon: React.ReactNode; label: string; count?: number; onClick: () => void }) { return <button className={`nav-item ${active ? 'active' : ''}`} onClick={onClick}>{icon}<span>{label}</span>{count !== undefined && <small>{count}</small>}</button>; }
-function Metric({ label, value, icon, tint }: { label: string; value: number; icon: React.ReactNode; tint: string }) { return <div className="metric"><div className={`metric-icon ${tint}`}>{icon}</div><div><span>{label}</span><strong>{value}</strong></div><div className="metric-trend">↗</div></div>; }
+function Metric({ label, value, icon, tint }: { label: string; value: number | string; icon: React.ReactNode; tint: string }) { return <div className="metric"><div className={`metric-icon ${tint}`}>{icon}</div><div><span>{label}</span><strong>{value}</strong></div><div className="metric-trend">↗</div></div>; }
 
 function QuizList({ quizzes, onEdit, onSelect, onRefresh, setNotice }: { quizzes: Quiz[]; onEdit: (quiz: Quiz) => void; onSelect: (quiz: Quiz) => void; onRefresh: () => Promise<void>; setNotice: (text: string) => void }) {
   async function remove(quiz: Quiz) {
