@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model Student {
+  id            String    @id @default(cuid())
+  name          String
+  passkeyHash   String
+  passkeyLookup String    @unique
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  attempts      Attempt[]
+}
+
+model Quiz {
+  id                       String    @id @default(cuid())
+  title                    String
+  mode                     QuizMode
+  status                   QuizStatus @default(DRAFT)
+  timeLimitSeconds         Int?
+  showResults              Boolean   @default(true)
+  currentQuestionIndex     Int       @default(0)
+  currentAnswerRevealed    Boolean   @default(false)
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+  questions                Question[]
+  attempts                 Attempt[]
+}
+
+model Question {
+  id        String   @id @default(cuid())
+  quizId    String
+  position  Int
+  prompt    String
+  marks     Int      @default(1)
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options   Option[]
+  answers   Answer[]
+  @@unique([quizId, position])
+}
+
+model Option {
+  id         String   @id @default(cuid())
+  questionId String
+  position   Int
+  text       String
+  isCorrect  Boolean  @default(false)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answers    Answer[]
+  @@unique([questionId, position])
+}
+
+model Attempt {
+  id          String        @id @default(cuid())
+  quizId      String
+  studentId   String
+  status      AttemptStatus @default(IN_PROGRESS)
+  startedAt   DateTime      @default(now())
+  deadlineAt  DateTime?
+  submittedAt DateTime?
+  score       Int?
+  quiz        Quiz          @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  student     Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  answers     Answer[]
+  @@unique([quizId, studentId])
+}
+
+model Answer {
+  id         String   @id @default(cuid())
+  attemptId  String
+  questionId String
+  optionId   String
+  updatedAt  DateTime @updatedAt
+  attempt    Attempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question  Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  option    Option   @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  @@unique([attemptId, questionId])
+}
+
+enum QuizMode {
+  LIVE
+  SELF_PACED
+}
+
+enum QuizStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+}
